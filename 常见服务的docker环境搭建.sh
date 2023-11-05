@@ -87,7 +87,12 @@ sudo docker run -d --name myredis -p 6379:6379 redis --requirepass "mypassword"
 sudo docker run -itd --name grafana -p 3000:3000 grafana/grafana
 
 sudo docker run -itd --name mysql-server -p 3306:3306 mysql/mysql-server
-# MySQL 8 的初始密码在 启动 log 中，搜 password 即可，用 docker logs 命令查看容器日志
+# MySQL 8 的初始密码在 启动 log 中，搜 password 即可，用 docker logs 命令查看容器日志，找到初始密码
+# 首次使用，需要进入 docker 中，登入 mysql，修改密码后，才能使用
+# 命令 ，alter user 'root'@'localhost' identified by 'root@123456';
+# 创建个新用户：CREATE USER 'dev'@'%' IDENTIFIED BY '123456';
+# 授权：GRANT xxxprivileges ON databasename.tablename TO 'username'@'host'
+# eg ： GRANT ALL ON *.* TO 'dev'@'%';
 
 # MongoDB
 sudo docker run -itd --name mongo -p 27017:27017 mongo --auth
