@@ -94,6 +94,23 @@ sudo docker run -itd --name mysql-8 -p 3308:3306 mysql:8.2
 # 授权：GRANT xxxprivileges ON databasename.tablename TO 'username'@'host'
 # eg ： GRANT ALL ON *.* TO 'dev'@'%';
 
+
+# podman 安装不同版本的 redis，指定不同的端口号（可以不指定密码）
+# redis 5, 6379 端口号对外暴漏为 6375
+podman run -d --name redis-5 -p 6375:6379 redis:5.0.14 --requirepass "123456"
+# redis 6, 6379 端口号对外暴漏为 6376
+podman run -d --name redis-6 -p 6376:6379 redis:6.2.11 --requirepass "123456"
+# redis 7, 6379 端口号对外暴漏为 6377
+podman run -d --name redis-7 -p 6377:6379 redis:7.0.10 --requirepass "123456"
+
+# podman 安装 percona 5.7， 指定密码和端口号 3305
+podman run -itd --name percona-5.7 -p 3305:3306 -e MYSQL_ROOT_PASSWORD=123456 percona:5.7.35
+# podman 安装 mysql 8.0， 指定密码和端口号 3308  
+# 下面这个命令 podman 在 linux 普通用户下运行 mysql 8 好像有权限问题，用 root 用户运行就没问题了 （麻蛋，浪费时间！！）
+podman run -itd --name mysql-8 -p 3308:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql:8.2
+
+
+
 # MongoDB
 sudo docker run -itd --name mongo -p 27017:27017 mongo --auth
 # sudo docker exec -it mongo mongo admin
