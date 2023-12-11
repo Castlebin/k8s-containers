@@ -86,8 +86,10 @@ sudo docker run -d --name myredis -p 6379:6379 redis --requirepass "mypassword"
 
 sudo docker run -itd --name grafana -p 3000:3000 grafana/grafana
 
-sudo docker run -itd --name mysql-8 -p 3308:3306 mysql:8.2
-# MySQL 8 的初始密码在 启动 log 中，搜 password 即可，用 docker logs 命令查看容器日志，找到初始密码
+sudo docker run --name MySQL-8 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest
+# (MYSQL_ROOT_PASSWORD 已经指定密码了)
+# 废弃
+# MySQL 8 的初始密码在 启动 log 中，搜 password 即可，用 docker logs 命令查看容器日志，找到初始密码 
 # 首次使用，需要进入 docker 中，登入 mysql，修改密码后，才能使用
 # 命令 ，alter user 'root'@'localhost' identified by '123456';
 # 创建个新用户：CREATE USER 'dev'@'%' IDENTIFIED BY '123456';
@@ -104,10 +106,10 @@ podman run -d --name redis-6 -p 6376:6379 redis:6.2.11 --requirepass "123456"
 podman run -d --name redis-7 -p 6377:6379 redis:7.0.10 --requirepass "123456"
 
 # podman 安装 percona 5.7， 指定密码和端口号 3305
-podman run -itd --name percona-5.7 -p 3305:3306 -e MYSQL_ROOT_PASSWORD=123456 percona:5.7.35
+podman run -itd --name percona-5.7 -p 3305:3306 -e MYSQL_ROOT_PASSWORD=123456 percona:5.7
 # podman 安装 mysql 8.0， 指定密码和端口号 3308  
 # 下面这个命令 podman 在 linux 普通用户下运行 mysql 8 好像有权限问题，用 root 用户运行就没问题了 （麻蛋，浪费时间！！）
-podman run -itd --name mysql-8 -p 3308:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql:8.2
+podman run -itd --name MySQL-8 -p 3308:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql:8.2
 
 
 
