@@ -86,7 +86,7 @@ sudo docker run -d --name myredis -p 6379:6379 redis --requirepass "mypassword"
 
 sudo docker run -itd --name grafana -p 3000:3000 grafana/grafana
 
-sudo docker run --name MySQL-8 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest
+sudo docker run --name MySQL-8 -p 3308:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest
 # (MYSQL_ROOT_PASSWORD 已经指定密码了)
 # 废弃
 # MySQL 8 的初始密码在 启动 log 中，搜 password 即可，用 docker logs 命令查看容器日志，找到初始密码 
