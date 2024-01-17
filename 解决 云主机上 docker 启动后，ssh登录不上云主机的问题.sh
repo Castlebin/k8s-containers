@@ -13,8 +13,8 @@ sudo ip link del br-54b657eb626c
 
 
 # 主要靠 下面的操作！
-sudo docker network rm xxxxx        删除所有创建的网络 或者
-sudo docker network prune       #删除所有不用的网络
+sudo docker network rm xxxxx        # 删除所有创建的网络 或者
+sudo docker network prune           # 删除所有不用的网络
 
 # 创建 docker 网络，指定网段，不要冲突，自动创建的可能会冲突，或者还是沿用之前的老旧设置
 # 创建一个桥接网络，并且指定网段！！！
