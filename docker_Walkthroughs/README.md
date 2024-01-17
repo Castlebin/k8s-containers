@@ -58,10 +58,9 @@ docker build -t <image_name> -f <Dockerfile_path> .
 docker build -t welcome-to-docker .
 ```
 
-
 ## 运行多个容器的应用
-`docker compose` 命令用于运行多个容器的应用，它的配置文件是 `docker-compose.yml` ，或者是 `compose.yaml` 。通常都是在有这个文件的目录下，执行 `docker compose 
-up` 命令。当然，也可以使用 `-f` 参数指定配置文件的路径。
+
+`docker compose` 命令用于运行多个容器的应用，它的配置文件是 `docker-compose.yml` ，或者是 `compose.yaml` 。通常都是在有这个文件的目录下，执行 `docker compose  up` 命令。当然，也可以使用 `-f` 参数指定配置文件的路径。
 
 ```shell
 docker compose up -d  # 以后台模式启动并创建服务
@@ -83,3 +82,7 @@ docker compose exec <service_name> <command>   # 在正在运行的服务中执�
 docker compose watch   # 监视文件变化并重新启动服务。在开发环境中非常有用，可以自动重启服务。
 ```
 
+
+## 使用 volumes 来持久化容器中的文件
+
+见 例子 multi-container-app 中的 compose.xml 文件中对 volumes 的声明 和 引用
