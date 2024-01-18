@@ -1,5 +1,11 @@
 # Docker 快速上手
 
+## 常用命令
+
+```shell
+docker run -itd -p 8088:80 --name welcome-to-docker docker/welcome-to-docker:lastest        # 运行容器
+```
+
 ## 运行 容器 ( container )
 
 ```shell
