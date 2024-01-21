@@ -126,6 +126,54 @@ https://yeasy.gitbook.io/docker_practice/image/dockerfile
 #### COPY
 `COPY` 命令用来复制文件，这里我们复制了 package.json 和 package-lock.json 文件，以及 src 和 public 目录。
 
+`COPY` 命令有两种格式，分别是：
+- COPY [--chown=<user>:<group>] <源路径>... <目标路径>              # 类似命令
+- COPY [--chown=<user>:<group>] ["<源路径1>",... "<目标路径>"]      # 类似函数调用
+
+#### RUN
+`RUN` 指令用来执行命令，这里我们执行了 npm install 命令，安装了依赖包。
+
+和 `COPY` 指令一样，`RUN` 指令也是那两种格式
+
+#### EXPOSE
+`EXPOSE` 指令用来指定端口，这里我们指定了 3000 端口。 
+EXPOSE 仅仅是声明容器打算使用什么端口而已，并不会自动在宿主进行端口映射。
+因此，如果想让外部进行访问，还需要在运行时通过 -p 参数来指定端口映射，或者通过 -P 参数来进行随机端口映射。
+
+#### CMD
+`CMD` 指令用来指定**容器启动时***要执行的命令，这里我们指定了 serve -s build 命令，也就是启动一个静态文件服务器。
+
+Docker 不是虚拟机，容器中的应用都应该以前台执行，而不是像虚拟机、物理机里面那样，用 systemd 去启动后台服务，容器内没有后台服务的概念。
+因此，Dockerfile 中的 CMD 指令，应该写为应用的启动命令，而不是后台服务的启动命令。比如，有些初学者可能会这么写：
+```dockerfile
+CMD service nginx start
+```
+然后发现容器执行后就立即退出了。甚至在容器内去使用 systemctl 命令结果却发现根本执行不了。这就是因为没有搞明白前台、后台的概念，没有区分容器和虚拟机的差异，依旧在以传统虚拟机的角度去理解容器。  
+
+对于容器而言，其启动程序就是容器应用进程，容器就是为了主进程而存在的，主进程退出，容器就失去了存在的意义，从而退出，其它辅助进程不是它需要关心的东西。  
+
+而使用 `service nginx start` 命令，则是希望 init 系统以后台守护进程的形式启动 nginx 服务。而刚才说了 `CMD service nginx start` 会被理解为 CMD [ "sh", "-c", "service nginx start"]，因此主进程实际上是 sh。那么当 `service nginx start` 命令结束后，sh 也就结束了，sh 作为主进程退出了，自然就会令容器退出。
+正确的做法是直接执行 nginx 可执行文件，并且要求以前台形式运行。比如：
+```dockerfile
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+CMD 是容器启动时执行程序的命令，如果在 Dockerfile 中写了多个 CMD 指令，只有最后一个 CMD 指令会生效。
+
+#### ENTRYPOINT
+ENTRYPOINT 的格式和 RUN 指令格式一样，分为 exec 格式和 shell 格式。
+ENTRYPOINT 的目的和 CMD 一样，都是在指定容器启动程序及参数。ENTRYPOINT 在运行时也可以替代，不过比 CMD 要略显繁琐，需要通过 docker run 的参数 --entrypoint 来指定。
+当指定了 ENTRYPOINT 后，CMD 的含义就发生了改变，不再是直接的运行其命令，而是将 CMD 的内容作为参数传给 ENTRYPOINT 指令，换句话说实际执行时，将变为：
+```dockerfile
+<ENTRYPOINT> "<CMD>"
+```
+
+### Dockerfile 多阶段构建
+Dockerfile 支持多阶段构建，这是一个高级特性，可以让我们更加灵活的构建镜像。比如，我们可以在一个 Dockerfile 中，既安装构建工具，又安装运行时依赖，最后编译出发布用的产物，而且不用担心构建出来的镜像会比较臃肿，因为我们可以精确地复制某个阶段的产物，而忽略掉其它阶段。
+这种 Dockerfile 我们通常可以看到，包含多个 FROM 指令，每个 FROM 指令都会引用不同的基础镜像，并且可以使用 COPY --from=<stage> 指令从其它阶段复制文件. <stage> 
+是阶段的名称或者数字（从0开始）
+
+
 ## 运行多个容器的应用
 
 `docker compose` 命令用于运行多个容器的应用，它的配置文件是 `docker-compose.yml` ，或者是 `compose.yaml` 。通常都是在有这个文件的目录下，执行 `docker compose  up` 命令。当然，也可以使用 `-f` 参数指定配置文件的路径。
