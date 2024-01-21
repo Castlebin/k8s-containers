@@ -64,6 +64,68 @@ docker build -t <image_name> -f <Dockerfile_path> .
 docker build -t welcome-to-docker .
 ```
 
+### Dockerfile 内容
+Dockfile 是用来构建镜像的配置文件，我们用它来定制镜像，内容格式样例如下：
+```dockerfile
+# Start your image with a node base image
+FROM node:18-alpine
+
+# The /app directory should act as the main application directory
+WORKDIR /app
+
+# Copy the app package and package-lock.json file
+COPY package*.json ./
+
+# Copy local directories to the current local directory of our docker image (/app)
+COPY ./src ./src
+COPY ./public ./public
+
+# Install node packages, install serve, build the app, and remove dependencies at the end
+RUN npm install \
+    && npm install -g serve \
+    && npm run build \
+    && rm -fr node_modules
+
+EXPOSE 3000
+
+# Start the app using serve command
+CMD [ "serve", "-s", "build" ]
+```
+
+#### 镜像构建上下文 ( build context )
+我们看一个镜像构建命令：
+```shell
+docker build -t welcome-to-docker .
+```
+这里的 `.` 表示当前目录，也就是 `Dockerfile` 所在的目录。这个目录就是镜像构建的上下文，比如，Dockerfile 中的 COPY 命令，会从这个目录开始查找文件。
+Dockerfile 就在当前目录，因此不少初学者以为这个路径是在指定 Dockerfile 所在路径，这么理解其实是不准确的。如果对应上面的命令格式，你可能会发现，这是在指定 上下文路径。怎么理解上下文呢？
+首先我们要理解 docker build 的工作原理。Docker 在运行时分为 Docker 引擎（也就是服务端守护进程）和客户端工具。Docker 的引擎提供了一组 REST API，被称为 Docker Remote API，而如 docker 命令这样的客户端工具，则是通过这组 API 与 Docker 引擎交互，从而完成各种功能。因此，虽然表面上我们好像是在本机执行各种 docker 功能，但实际上，一切都是使用的远程调用形式在服务端（Docker 引擎）完成。也因为这种 C/S 设计，让我们操作远程服务器的 Docker 引擎变得轻而易举。
+当我们进行镜像构建的时候，并非所有定制都会通过 RUN 指令完成，经常会需要将一些本地文件复制进镜像，比如通过 COPY 指令、ADD 指令等。而 docker build 命令构建镜像，其实并非在本地构建，而是在服务端，也就是 Docker 引擎中构建的。那么在这种客户端/服务端的架构中，如何才能让服务端获得本地文件呢？
+这就引入了上下文的概念。当构建的时候，用户会指定构建镜像上下文的路径，docker build 命令得知这个路径后，会将路径下的所有内容打包，然后上传给 Docker 引擎。这样 Docker 
+引擎收到这个上下文包后，展开就会获得构建镜像所需的一切文件。（如果目录下有些东西确实不希望构建时传给 Docker 引擎，那么可以用 .gitignore 一样的语法写一个 .dockerignore，该文件是用于剔除不需要作为上下文传递给 Docker 引擎的。）
+
+如果在 Dockerfile 中这么写：
+```dockerfile
+COPY ./package.json /app/
+```
+这并不是要复制执行 docker build 命令所在的目录下的 package.json，也不是复制 Dockerfile 所在目录下的 package.json，而是复制 上下文（context） 目录下的 package.json。
+因此，COPY 这类指令中的源文件的路径都是相对路径。这也是初学者经常会问的为什么 COPY ../package.json /app 或者 COPY /opt/xxxx /app 无法工作的原因，因为这些路径已经超出了上下文的范围，Docker 引擎无法获得这些位置的文件。如果真的需要那些文件，应该将它们复制到上下文目录中去。
+
+
+### Dockerfile 命令详解
+https://yeasy.gitbook.io/docker_practice/image/dockerfile
+#### FROM 
+`FROM` 命令用来指定基础镜像，这里我们使用的是 node:18-alpine 镜像，<名字>:<版本号> 的格式
+除了这些常规镜像之外，有个叫 scratch 名字的镜像，这是一个空镜像，没有任何文件。如果你以 scratch 为基础镜像的话，意味着你不以任何镜像为基础，接下来所写的指令将作为镜像第一层开始存在。对于 Linux 
+下静态编译的程序来说，并不需要有操作系统提供运行时支持，所需的一切库都已经在可执行文件里了，因此直接 FROM scratch 会让镜像体积更加小巧，比如很多纯 go 语言开发的应用。
+
+#### WORKDIR
+`WORKDIR` 命令用来指定工作目录，这里我们指定为 /app 目录，如果目录不存在，会自动创建。
+
+
+#### COPY
+`COPY` 命令用来复制文件，这里我们复制了 package.json 和 package-lock.json 文件，以及 src 和 public 目录。
+
 ## 运行多个容器的应用
 
 `docker compose` 命令用于运行多个容器的应用，它的配置文件是 `docker-compose.yml` ，或者是 `compose.yaml` 。通常都是在有这个文件的目录下，执行 `docker compose  up` 命令。当然，也可以使用 `-f` 参数指定配置文件的路径。
