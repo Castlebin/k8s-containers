@@ -1,3 +1,11 @@
+# docker 免 sudo 命令
+sudo groupadd docker     # 添加docker用户组
+sudo gpasswd -a $USER docker     # 将登陆用户加入到docker用户组中
+newgrp docker     # 更新用户组
+docker ps    # 测试docker命令是否可以使用sudo正常使用
+
+
+
 # 其实官方文档中，很多都提供了 docker-compose.yml 文件，可以直接使用来搭建测试用的集群，更加方便
 # 或者直接在 docker 仓库里面搜索，看简绍
 
@@ -86,17 +94,6 @@ sudo docker run -d --name myredis -p 6379:6379 redis --requirepass "mypassword"
 
 sudo docker run -itd --name grafana -p 3000:3000 grafana/grafana
 
-sudo docker run --name MySQL-8 -p 3308:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:latest
-# (MYSQL_ROOT_PASSWORD 已经指定密码了)
-# 废弃
-# MySQL 8 的初始密码在 启动 log 中，搜 password 即可，用 docker logs 命令查看容器日志，找到初始密码 
-# 首次使用，需要进入 docker 中，登入 mysql，修改密码后，才能使用
-# 命令 ，alter user 'root'@'localhost' identified by '123456';
-# 创建个新用户：CREATE USER 'dev'@'%' IDENTIFIED BY '123456';
-# 授权：GRANT xxxprivileges ON databasename.tablename TO 'username'@'host'
-# eg ： GRANT ALL ON *.* TO 'dev'@'%';
-
-
 # podman 安装不同版本的 redis，指定不同的端口号（可以不指定密码）
 # redis 5, 6379 端口号对外暴漏为 6375
 podman run -d --name redis-5 -p 6375:6379 redis:5.0.14 --requirepass "123456"
@@ -107,9 +104,9 @@ podman run -d --name redis-7 -p 6377:6379 redis:7.0.10 --requirepass "123456"
 
 # podman 安装 percona 5.7， 指定密码和端口号 3305
 podman run -itd --name percona-5.7 -p 3305:3306 -e MYSQL_ROOT_PASSWORD=123456 percona:5.7
-# podman 安装 mysql 8.0， 指定密码和端口号 3308  
+# podman 安装 mysql 8， 指定密码和端口号 3308
 # 下面这个命令 podman 在 linux 普通用户下运行 mysql 8 好像有权限问题，用 root 用户运行就没问题了 （麻蛋，浪费时间！！）
-podman run -itd --name MySQL-8 -p 3308:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql:8.2
+podman run -itd --name MySQL-8 -p 3308:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql:latest
 
 
 
@@ -130,6 +127,8 @@ sudo docker run -itd --name hadoop -p 8042:8042 -p 8088:8088 -p 19888:19888 -p 5
 mkdir $HOME/data/clickhouse_data
 sudo docker run -itd --name clickhouse-server --ulimit nofile=262144:262144 --volume=$HOME/data/clickhouse_data:/var/lib/clickhouse -p 8123:8123 -p 9100:9000 yandex/clickhouse-server 
 
+
+## 以下是一些常用的命令
 # 查看容器日志
 sudo docker logs {{容器ID 或者 容器名}}
 
@@ -154,38 +153,34 @@ sudo systemctl daemon-reload && sudo systemctl restart docker
 /etc/docker/daemon.json
 {
   "registry-mirrors": [
-    "https://7r6kirhl.mirror.aliyuncs.com"
-    , "https://hub-mirror.c.163.com"
-    , "https://mirror.baidubce.com"
-    , "https://ustc-edu-cn.mirror.aliyuncs.com"
-    , "https://mirror.ccs.tencentyun.com"
-    , "https://05f073ad3c0010ea0f4bc00b7105ec20.mirror.swr.myhuaweicloud.com"
-    , "https://registry.cn-hangzhou.aliyuncs.com"
-    , "http://f1361db2.m.daocloud.io"
-    , "https://dockerhub.azk8s.cn"
-    , "https://registry.docker-cn.com"
+    "https://hub-mirror.c.163.com",
+    "https://mirror.baidubce.com",
+    "https://ustc-edu-cn.mirror.aliyuncs.com",
+    "https://mirror.ccs.tencentyun.com",
+    "https://registry.cn-hangzhou.aliyuncs.com",
+    "https://dockerhub.azk8s.cn",
+    "https://registry.docker-cn.com"
   ],
   "live-restore": true,
   "group": "docker"
 }
 
 
+# Linux 打开/关闭 端口命令
+# 一、查看哪些端口被打开
+netstat -anp
 
-一、查看哪些端口被打开 netstat -anp
-二、关闭端口号:
-
+# 二、关闭端口号:
 iptables -A OUTPUT -p tcp --dport 端口号 -j DROP
-1
-三、打开端口号：
 
+# 三、打开端口号：
 iptables -A INPUT -ptcp --dport  端口号 -j ACCEPT
-1
-四、保存设置
 
+# 四、保存设置
 service iptables save
-1
-五、以下是linux打开端口命令的使用方法。
-　　nc -lp 23 &(打开23端口，即telnet)
-　　netstat -an | grep 23 (查看是否打开23端口)
-六、linux打开端口命令每一个打开的端口，都需要有相应的监听程序才可以
+
+# 五、以下是linux打开端口命令的使用方法。
+　　nc -lp 23 &    # (打开23端口，即telnet)
+　　netstat -an | grep 23 # (查看是否打开23端口)
+# 六、linux 打开端口命令每一个打开的端口，都需要有相应的监听程序才可以
 
