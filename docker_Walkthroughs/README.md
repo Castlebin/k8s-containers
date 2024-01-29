@@ -28,7 +28,7 @@ docker run -itd -p 8088:80 --name welcome-to-docker docker/welcome-to-docker:las
     `-m` 表示设置容器的内存限制，单位是字节。
     `--cpus` 表示设置容器的 CPU 限制，单位是个数。
     `--network` 表示设置容器的网络模式，有 bridge、host、none 等模式。
-    `--restart` 表示设置容器的重启策略，有 no、always、on-failure 等策略。
+    `--restart` 表示设置容器的重启策略，有 no、always、on-failure 等策略。always 表示可以自动重启，on-failure 表示容器退出时自动重启。
     `--privileged` 表示设置容器的特权模式，容器中的命令会以 root 用户的身份执行。
     `--rm` 表示容器退出时自动删除容器。
     `--link` 表示容器间的连接，可以让容器之间互相访问。
@@ -40,6 +40,25 @@ docker run -itd -p 8088:80 --name welcome-to-docker docker/welcome-to-docker:las
     `--expose` 表示设置容器的端口，可以让容器监听这个端口。
     `--env-file` 表示设置容器的环境变量文件，可以从文件中读取环境变量。
     `--label` 表示设置容
+
+### 启动容器并且让容器可以自动重启
+```shell
+docker run -itd --restart=always {image_name}
+```
+即在启动时，加上 `--restart=always` 参数即可
+如果后续需要修改重启策略，可以使用 `docker update` 命令，如：
+
+```shell
+docker update --restart=no {container_name}     # --restart 有 no、always、on-failure 等策略
+```
+
+
+## 查看 容器 ( container )
+```shell
+docker ps
+```
+查看容器的命令是 `docker ps` ，这个命令会列出所有正在运行的容器。如果要查看所有容器，包括已经退出的容器，可以加上 `-a` 参数。
+
 
 ## 构建 镜像 ( image )
 
