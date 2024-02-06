@@ -87,46 +87,17 @@ Minikube 是一个轻量级的 Kubernetes 实现，它可以在本地运行仅�
 我们还需要使用 kubectl 这个命令工具，来和 Kubernetes 集群进行交互。和 Web UI 一样，它也是和 Kubernetes 中的 API Server 进行交互的
 
 
+## NodePort
+
+外部服务有几种类型，其中一种就是 NodePort，它会在节点上开放一个端口，将这个端口映射到 Service 的 IP 和端口号上。
+
+这样我们就可以通过节点（Node）的 IP 和端口号来访问 Service 了。
+
+在开发和测试阶段，使用这种 IP + 端口号去访问 Service 是没啥问题的，但是最好通过域名的方式来访问 Service。这种时候，就会用到 Ingress.
 
 
+## Ingress （可以理解为 k8s 的 nginx）
 
+ingress 是用来管理从 k8s 集群外部来访问集群内部服务的入口和方式的。可以通过 Ingress 来配置各种不同的转发规则，从而根据不同的规则，来访问集群内部不同的 Service .
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+还可以通过 Ingress 来配置域名，这样就不用使用节点的IP 和 端口号这种方式访问 Service 了
