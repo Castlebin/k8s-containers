@@ -3,11 +3,11 @@ kind: Service
 metadata:
   name: nginx-service
 spec:
+  type: NodePort              # 指定服务类型为 NodePort。将服务公开到集群节点上。集群外部机器可以访问
   selector:
     app: nginx
   ports:
   - protocol: TCP
     port: 80
     targetPort: 80
-
-    
+    nodePort: 30080           # 对外暴露的端口号（默认情况下，只能是 30000~32767 之间）
